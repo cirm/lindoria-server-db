@@ -1,2 +1,2 @@
 # lindoria-server-db
-Db implementation for Lindoria
+DB implementation for Lindoria
