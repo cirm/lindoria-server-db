@@ -74,10 +74,10 @@ CREATE OR REPLACE FUNCTION web.update_password(
 ) RETURNS BOOLEAN AS $BODY$
 BEGIN
     UPDATE web.users
-       SET salt         = web.update_password.i_salt,
-           hashed_pwd   = web.update_password.i_hashed_pwd,
+       SET salt         = update_password.i_salt,
+           hashed_pwd   = update_password.i_hashed_pwd,
            updated_at   = NOW()
-     WHERE web.users.username = web.update_user.i_username;
+     WHERE users.username = update_user.i_username;
     RETURN FOUND;
 END;
 $BODY$
@@ -102,9 +102,9 @@ Update the specified username. The user must be active. The username cannot be c
 */
 BEGIN
     UPDATE web.users
-       SET usr_display          = COALESCE(web.update_user.i_usr_display, web.users.usr_display),
+       SET usr_display          = COALESCE(update_user.i_usr_display, users.usr_display),
            updated_at           = NOW()
-     WHERE web.users.username   = web.update_user.i_username;
+     WHERE users.username   = update_user.i_username;
     RETURN FOUND;
 END;
 $BODY$
