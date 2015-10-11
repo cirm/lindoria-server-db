@@ -67,6 +67,22 @@ END;
 $BODY$
 LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION web.update_password(
+    i_username      varchar(10),
+    i_salt          varchar(29),
+    i_hashed_pwd    varchar(60)
+) RETURNS BOOLEAN AS $BODY$
+BEGIN
+    UPDATE web.users
+       SET salt         = web.update_password.i_salt,
+           hashed_pwd   = web.update_password.i_hashed_pwd,
+           updated_at   = NOW()
+     WHERE web.users.username = web.update_user.i_username;
+    RETURN FOUND;
+END;
+$BODY$
+LANGUAGE plpgsql;
+
 
 CREATE OR REPLACE FUNCTION web.update_user(
     i_username      varchar(10),
@@ -86,9 +102,9 @@ Update the specified username. The user must be active. The username cannot be c
 */
 BEGIN
     UPDATE web.users
-       SET usr_display          = COALESCE(update_user.i_usr_display, web.users.usr_display),
+       SET usr_display          = COALESCE(web.update_user.i_usr_display, web.users.usr_display),
            updated_at           = NOW()
-     WHERE web.users.username   = update_user.i_username;
+     WHERE web.users.username   = web.update_user.i_username;
     RETURN FOUND;
 END;
 $BODY$
