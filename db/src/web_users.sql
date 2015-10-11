@@ -24,7 +24,7 @@ CREATE OR REPLACE FUNCTION web.create_user (
     IN i_roles text[]
 ) RETURNS json AS
 /*
-    % SELECT insert_user(
+    % SELECT web.insert_user(
         i_username  := 'theory',
         i_usr_display := 'Big Dude Eleven',
         i_salt := '***',
@@ -70,12 +70,10 @@ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION web.update_user(
     i_username      varchar(10),
-    i_usr_display   varchar(25),
-    i_salt          varchar(29),
-    i_hashed_pwd    varchar(60)
+    i_usr_display   varchar(25)
 ) RETURNS BOOLEAN AS $BODY$
 /*
-    % SELECT update_user(
+    % SELECT web.update_user(
         i_usr_display := 'Big Dude Ten',
         i_salt := '***',
         i_hashed_pwd := '******'
@@ -89,8 +87,6 @@ Update the specified username. The user must be active. The username cannot be c
 BEGIN
     UPDATE web.users
        SET usr_display          = COALESCE(update_user.i_usr_display, web.users.usr_display),
-           salt                 = COALESCE(update_user.i_salt, web.users.salt),
-           hashed_pwd           = COALESCE(update_user.i_hashed_pwd, web.users.hashed_pwd),
            updated_at           = NOW()
      WHERE web.users.username   = update_user.i_username;
     RETURN FOUND;
