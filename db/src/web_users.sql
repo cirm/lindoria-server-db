@@ -62,7 +62,7 @@ INSERT INTO web.users (
     i_hashed_pwd,
     i_roles);
 RETURN ( SELECT row_to_json(t) FROM (
-    SELECT username, usr_display FROM web.users where username=i_username) t);
+    SELECT username, usr_display FROM web.users WHERE username=i_username) t);
 END;
 $BODY$
 LANGUAGE plpgsql;
@@ -77,8 +77,8 @@ BEGIN
        SET salt         = update_password.i_salt,
            hashed_pwd   = update_password.i_hashed_pwd,
            updated_at   = NOW()
-     WHERE users.username = update_user.i_username;
-    RETURN FOUND;
+     WHERE users.username = update_password.i_username;
+     RETURN FOUND;
 END;
 $BODY$
 LANGUAGE plpgsql;
@@ -87,7 +87,7 @@ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION web.update_user(
     i_username      varchar(10),
     i_usr_display   varchar(25)
-) RETURNS BOOLEAN AS $BODY$
+) RETURNS json AS $BODY$
 /*
     % SELECT web.update_user(
         i_usr_display := 'Big Dude Ten',
@@ -98,14 +98,15 @@ CREATE OR REPLACE FUNCTION web.update_user(
     ─────────────
      t
 Update the specified username. The user must be active. The username cannot be changed. The password can only be changed
- via `change_password()` or `reset_password()`. Returns true if the user was updated, and false if not.
+ via `update_password`. Returns true if the user was updated, and false if not.
 */
 BEGIN
     UPDATE web.users
        SET usr_display          = COALESCE(update_user.i_usr_display, users.usr_display),
            updated_at           = NOW()
      WHERE users.username   = update_user.i_username;
-    RETURN FOUND;
+    RETURN ( SELECT row_to_json(t) FROM (
+        SELECT username, usr_display FROM web.users WHERE username=i_username) t);
 END;
 $BODY$
 LANGUAGE plpgsql;
