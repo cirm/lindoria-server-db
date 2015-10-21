@@ -3,26 +3,28 @@ BEGIN;
 DROP TABLE IF EXISTS users;
 DROP SCHEMA IF EXISTS web CASCADE;
 
-CREATE SCHEMA web AUTHORIZATION geegomoonshine;
+CREATE SCHEMA web
+  AUTHORIZATION geegomoonshine;
 
 CREATE TABLE web.users (
-    usr_display     varchar(25),
-    username        varchar(10) NOT NULL UNIQUE,
-    salt            varchar(29),
-    hashed_pwd      varchar(60),
-    roles           text[],
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    visited_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  usr_display VARCHAR(25),
+  username    VARCHAR(10) NOT NULL UNIQUE,
+  salt        VARCHAR(29),
+  hashed_pwd  VARCHAR(60),
+  roles       TEXT [],
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  visited_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE OR REPLACE FUNCTION web.create_user (
-    IN i_usr_display varchar(25),
-    IN i_username varchar(10),
-    IN i_salt varchar(29),
-    IN i_hashed_pwd varchar(60),
-    IN i_roles text[]
-) RETURNS json AS
+CREATE OR REPLACE FUNCTION web.create_user(
+  IN i_usr_display VARCHAR(25),
+  IN i_username    VARCHAR(10),
+  IN i_salt        VARCHAR(29),
+  IN i_hashed_pwd  VARCHAR(60),
+  IN i_roles       TEXT []
+)
+  RETURNS JSON AS
 /*
     % SELECT web.insert_user(
         i_username  := 'theory',
@@ -49,45 +51,52 @@ i_roles
 
 $BODY$
 BEGIN
-INSERT INTO web.users (
+  INSERT INTO web.users (
     usr_display,
     username,
     salt,
     hashed_pwd,
     roles
-) VALUES (
+  ) VALUES (
     i_usr_display,
     i_username,
     i_salt,
     i_hashed_pwd,
     i_roles);
-RETURN ( SELECT row_to_json(t) FROM (
-    SELECT username, usr_display FROM web.users WHERE username=i_username) t);
+  RETURN (SELECT row_to_json(t)
+          FROM (
+                 SELECT
+                   username,
+                   usr_display
+                 FROM web.users
+                 WHERE username = i_username) t);
 END;
 $BODY$
 LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION web.update_password(
-    i_username      varchar(10),
-    i_salt          varchar(29),
-    i_hashed_pwd    varchar(60)
-) RETURNS BOOLEAN AS $BODY$
+  i_username   VARCHAR(10),
+  i_salt       VARCHAR(29),
+  i_hashed_pwd VARCHAR(60)
+)
+  RETURNS BOOLEAN AS $BODY$
 BEGIN
-    UPDATE web.users
-       SET salt         = update_password.i_salt,
-           hashed_pwd   = update_password.i_hashed_pwd,
-           updated_at   = NOW()
-     WHERE users.username = update_password.i_username;
-     RETURN FOUND;
+  UPDATE web.users
+  SET salt     = i_salt,
+    hashed_pwd = i_hashed_pwd,
+    updated_at = NOW()
+  WHERE users.username = i_username;
+  RETURN FOUND;
 END;
 $BODY$
 LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION web.update_user(
-    i_username      varchar(10),
-    i_usr_display   varchar(25)
-) RETURNS json AS $BODY$
+  i_username    VARCHAR(10),
+  i_usr_display VARCHAR(25)
+)
+  RETURNS JSON AS $BODY$
 /*
     % SELECT web.update_user(
         i_usr_display := 'Big Dude Ten',
@@ -101,19 +110,25 @@ Update the specified username. The user must be active. The username cannot be c
  via `update_password`. Returns true if the user was updated, and false if not.
 */
 BEGIN
-    UPDATE web.users
-       SET usr_display          = COALESCE(update_user.i_usr_display, users.usr_display),
-           updated_at           = NOW()
-     WHERE users.username   = update_user.i_username;
-    RETURN ( SELECT row_to_json(t) FROM (
-        SELECT username, usr_display FROM web.users WHERE username=i_username) t);
+  UPDATE web.users
+  SET usr_display = COALESCE(i_usr_display, users.usr_display),
+    updated_at    = NOW()
+  WHERE users.username = i_username;
+  RETURN (SELECT row_to_json(t)
+          FROM (
+                 SELECT
+                   username,
+                   usr_display
+                 FROM web.users
+                 WHERE username = i_username) t);
 END;
 $BODY$
 LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION web.log_visit(
-    i_username  varchar(10)
-) RETURNS BOOLEAN AS $BODY$
+  i_username VARCHAR(10)
+)
+  RETURNS BOOLEAN AS $BODY$
 /*
     % SELECT log_visit('theory');
      log_visit
@@ -123,10 +138,10 @@ Log the visit for the specified username. At this point, that just means that
 `web.users.visited_at` gets set to the current time.
 */
 BEGIN
-    UPDATE web.users
-       SET visited_at     = NOW()
-     WHERE users.username = log_visit.i_username;
-    RETURN FOUND;
+  UPDATE web.users
+  SET visited_at = NOW()
+  WHERE users.username = i_username;
+  RETURN FOUND;
 END;
 $BODY$
 LANGUAGE plpgsql;
