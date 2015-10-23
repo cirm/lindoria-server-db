@@ -7,43 +7,43 @@ CREATE SCHEMA web
   AUTHORIZATION geegomoonshine;
 
 CREATE TABLE web.users (
-  usr_display VARCHAR(25),
-  username    VARCHAR(10) NOT NULL UNIQUE,
-  salt        VARCHAR(29),
-  hashed_pwd  VARCHAR(60),
-  roles       TEXT [],
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  visited_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  display   VARCHAR(25),
+  username  VARCHAR(10) NOT NULL UNIQUE,
+  salt      VARCHAR(29),
+  hpassword VARCHAR(60),
+  roles     TEXT [],
+  created   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  visited   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE OR REPLACE FUNCTION web.create_user(
-  IN i_usr_display VARCHAR(25),
-  IN i_username    VARCHAR(10),
-  IN i_salt        VARCHAR(29),
-  IN i_hashed_pwd  VARCHAR(60),
-  IN i_roles       TEXT []
+  IN i_display   VARCHAR(25),
+  IN i_username  VARCHAR(10),
+  IN i_salt      VARCHAR(29),
+  IN i_hpassword VARCHAR(60),
+  IN i_roles     TEXT []
 )
   RETURNS JSON AS
 /*
     % SELECT web.insert_user(
         i_username  := 'theory',
-        i_usr_display := 'Big Dude Eleven',
+        i_display := 'Big Dude Eleven',
         i_salt := '***',
-        i_hashed_pwd     := '******',
+        i_hpassword     := '******',
         i_roles = ['admin', 'player', 'dm']
     );
      insert_user
     ─────────────
          t
 Inserts a new user into the database. The other parameters are:
-i_usr_display
+i_display
 : The full display name of the user.
 i_username
 : The username of the user for login.
 i_salt
 : Random salt used to hash password.
-i_hashed_pwd
+i_hpassword
 : Hashed Password for the user login.
 i_roles
 : List of active roles for the user.
@@ -52,24 +52,27 @@ i_roles
 $BODY$
 BEGIN
   INSERT INTO web.users (
-    usr_display,
+    display,
     username,
     salt,
-    hashed_pwd,
+    hpassword,
     roles
   ) VALUES (
-    i_usr_display,
+    i_display,
     i_username,
     i_salt,
-    i_hashed_pwd,
+    i_hpassword,
     i_roles);
-  RETURN (SELECT row_to_json(t)
+  RETURN (SELECT
+            row_to_json(t)
           FROM (
                  SELECT
                    username,
-                   usr_display
-                 FROM web.users
-                 WHERE username = i_username) t);
+                   display
+                 FROM
+                   web.users
+                 WHERE
+                   username = i_username) t);
 END;
 $BODY$
 LANGUAGE plpgsql;
@@ -77,15 +80,18 @@ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION web.update_password(
   i_username   VARCHAR(10),
   i_salt       VARCHAR(29),
-  i_hashed_pwd VARCHAR(60)
+  i_hpassword VARCHAR(60)
 )
   RETURNS BOOLEAN AS $BODY$
 BEGIN
-  UPDATE web.users
-  SET salt     = i_salt,
-    hashed_pwd = i_hashed_pwd,
+  UPDATE
+    web.users
+  SET
+    salt     = i_salt,
+    hpassword  = i_hpassword,
     updated_at = NOW()
-  WHERE users.username = i_username;
+  WHERE
+    users.username = i_username;
   RETURN FOUND;
 END;
 $BODY$
@@ -110,17 +116,23 @@ Update the specified username. The user must be active. The username cannot be c
  via `update_password`. Returns true if the user was updated, and false if not.
 */
 BEGIN
-  UPDATE web.users
-  SET usr_display = COALESCE(i_usr_display, users.usr_display),
+  UPDATE
+    web.users
+  SET
+    usr_display = COALESCE(i_usr_display, users.usr_display),
     updated_at    = NOW()
-  WHERE users.username = i_username;
-  RETURN (SELECT row_to_json(t)
+  WHERE
+    users.username = i_username;
+  RETURN (SELECT
+            row_to_json(t)
           FROM (
                  SELECT
                    username,
-                   usr_display
-                 FROM web.users
-                 WHERE username = i_username) t);
+                   display
+                 FROM
+                   web.users
+                 WHERE
+                   username = i_username) t);
 END;
 $BODY$
 LANGUAGE plpgsql;
@@ -138,9 +150,12 @@ Log the visit for the specified username. At this point, that just means that
 `web.users.visited_at` gets set to the current time.
 */
 BEGIN
-  UPDATE web.users
-  SET visited_at = NOW()
-  WHERE users.username = i_username;
+  UPDATE
+    web.users
+  SET
+    visited_at = NOW()
+  WHERE
+    users.username = i_username;
   RETURN FOUND;
 END;
 $BODY$
