@@ -89,7 +89,7 @@ BEGIN
   SET
     salt     = i_salt,
     hpassword  = i_hpassword,
-    updated_at = NOW()
+    updated = NOW()
   WHERE
     users.username = i_username;
   RETURN FOUND;
@@ -117,10 +117,10 @@ Update the specified username. The user must be active. The username cannot be c
 */
 BEGIN
   UPDATE
-    web.users
+    web.users wu
   SET
-    usr_display = COALESCE(i_usr_display, users.usr_display),
-    updated_at    = NOW()
+    display = COALESCE(i_usr_display, users.display),
+    updated    = NOW()
   WHERE
     users.username = i_username;
   RETURN (SELECT
@@ -153,7 +153,7 @@ BEGIN
   UPDATE
     web.users
   SET
-    visited_at = NOW()
+    visited = NOW()
   WHERE
     users.username = i_username;
   RETURN FOUND;
