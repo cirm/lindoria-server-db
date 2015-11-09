@@ -19,3 +19,32 @@ CREATE OR REPLACE FUNCTION empires.create_domain (
   IN  i_abbr,
   IN  i_treasury
 )
+  RETURNS JSON AS
+  $BODY$
+  BEGIN
+    INSER INTO empires.domains (
+    dname,
+    regent,
+    display,
+    abbr,
+    treasury
+    ) VALUES (
+    i_dname,
+    i_regent,
+    i_display,
+    i_abbr,
+    i_treasury);
+    RETURN (
+      SELECT
+      dname,
+      regent,
+      display,
+      abbr,
+      treasury
+      FROM
+        empires.domains
+      WHERE
+        dname = dname);
+  END;
+  $BODY$
+  LANGUAGE plpgsql;
