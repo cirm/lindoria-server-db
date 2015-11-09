@@ -1,0 +1,7 @@
+BEGIN;
+
+DROP SCHEMA IF EXISTS empires CASCADE;
+
+CREATE SCHEMA empires AUTHORIZATION geegomoonshine;
+
+COMMIT;
