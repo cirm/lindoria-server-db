@@ -8,7 +8,7 @@ CREATE SCHEMA web
 
 CREATE TABLE web.users (
   display   VARCHAR(25),
-  username  VARCHAR(10) NOT NULL UNIQUE,
+  username  VARCHAR(10) PRIMARY KEY,
   salt      VARCHAR(29),
   hpassword VARCHAR(60),
   roles     TEXT [],
