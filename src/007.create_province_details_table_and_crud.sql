@@ -17,3 +17,5 @@ CREATE TABLE empires.province_details (
   bridges empires.bridge_types,
   FOREIGN KEY (province) REFERENCES empires.provinces (pname)
 );
+
+COMMIT;
