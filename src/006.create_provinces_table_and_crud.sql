@@ -90,7 +90,7 @@ CREATE OR REPLACE FUNCTION empires.update_province (
       visible = COALESCE(i_visible, provinces.visible),
       abbr    = COALESCE(i_abbr, provinces.abbr)
     WHERE
-      provinces.pname = i_pname;
+      pname = i_pname;
   RETURN (
     SELECT
       pname,
