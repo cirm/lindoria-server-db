@@ -15,7 +15,7 @@ CREATE TABLE empires.province_details (
   roads   empires.road_types,
   city    VARCHAR(20),
   bridges empires.bridge_types,
-  FOREIGN KEY (province) REFERENCES empires.provinces (pname)
+  FOREIGN KEY (province) REFERENCES empires.provinces (pname) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE OR REPLACE FUNCTION empires.create_province_details(

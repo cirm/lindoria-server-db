@@ -9,7 +9,7 @@ CREATE TABLE empires.domains (
     CONSTRAINT abbr_length CHECK (char_length(abbr) < 2),
     CONSTRAINT abbr_upper  CHECK (abbr = upper(abbr)),
     CONSTRAINT positive_treasury CHECK (treasury > -1),
-    FOREIGN KEY (regent) REFERENCES empires.persons (pname)
+    FOREIGN KEY (regent) REFERENCES empires.persons (pname) ON UPDATE CASCADE ON DELETE SET NULL
 );
 
 CREATE OR REPLACE FUNCTION empires.create_domain (

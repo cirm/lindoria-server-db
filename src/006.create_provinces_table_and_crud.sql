@@ -13,8 +13,8 @@ CREATE TABLE empires.provinces (
   CONSTRAINT abbr_length CHECK ( char_length(abbr) < 2),
   CONSTRAINT loyalty_boundary CHECK ( loyalty BETWEEN 0 AND 5),
   CONSTRAINT level_boundary CHECK ( level BETWEEN 0 AND 10),
-  FOREIGN KEY (regent) REFERENCES empires.persons (pname),
-  FOREIGN KEY (domain) REFERENCES empires.domains (dname)
+  FOREIGN KEY (regent) REFERENCES empires.persons (pname) ON UPDATE CASCADE ON DELETE SET NULL,
+  FOREIGN KEY (domain) REFERENCES empires.domains (dname) ON UPDATE CASCADE ON DELETE SET NULL
   );
 
 CREATE OR REPLACE FUNCTION empires.create_province (

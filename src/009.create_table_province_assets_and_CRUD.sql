@@ -13,7 +13,7 @@ CREATE TABLE empires.province_assets (
     display     VARCHAR(25),
     province    VARCHAR(10),
     level       SMALLINT,
-    FOREIGN KEY (province) REFERENCES empires.provinces(pname) ON DELETE CASCADE,
+    FOREIGN KEY (province) REFERENCES empires.provinces(pname) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT level_boundary CHECK (level between 0 and 10)
 );
 
