@@ -19,15 +19,18 @@ CREATE OR REPLACE FUNCTION empires.create_person (
         i_pname,
         i_display
         );
-        RETURN (
-            SELECT
-                pname,
+    RETURN (
+        SELECT
+            row_to_json(t)
+        FROM (
+    		SELECT
+    		    pname,
                 display
             FROM
                 empires.persons
             WHERE
-                pname = i_pname);
-    END;
+                pname = i_pname) t) ;
+    END
     $BODY$
     LANGUAGE plpgsql;
 
@@ -35,10 +38,9 @@ CREATE OR REPLACE FUNCTION empires.update_person (
     IN  i_pname     VARCHAR(10),
     IN  i_display   VARCHAR(25)
 )
-    RETURNS JSON AS $BODY$
-
-BEGIN
-    UPDATE
+    RETURNS JSON AS
+    $BODY$
+    BEGIN UPDATE
         empires.persons
     SET
         display = COALESCE(i_display, display)
@@ -46,15 +48,18 @@ BEGIN
         pname = i_pname;
     RETURN (
         SELECT
-            pname,
-            display
-        FROM
-            empires.persons
-        WHERE
-            pname = i_pname);
-END
-$BODY$
-LANGUAGE plpgsql;
+            row_to_json(t)
+        FROM (
+            SELECT
+                pname,
+                display
+            FROM
+                empires.persons
+            WHERE
+                pname = i_pname) t);
+    END
+    $BODY$
+    LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION empires.delete_person (
     IN i_pname VARCHAR(10)

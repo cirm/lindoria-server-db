@@ -35,7 +35,7 @@ CREATE OR REPLACE FUNCTION empires.create_province_asset (
         i_display,
         i_province,
         i_level);
-        RETURN (
+        RETURN( SELECT row_to_json (t) FROM (
             SELECT
             asset_id,
             asset_type,
@@ -46,7 +46,7 @@ CREATE OR REPLACE FUNCTION empires.create_province_asset (
                 empires.province_assets
             WHERE
                 asset_type = i_asset_type AND
-                province = i_province);
+                province = i_province) t);
     END;
     $BODY$
     LANGUAGE plpgsql;
@@ -66,7 +66,7 @@ CREATE OR REPLACE FUNCTION empires.update_province_asset (
         level       = COALESCE(i_level, pa.level)
     WHERE
         pa.asset_id = i_asset_id;
-    RETURN (
+    RETURN ( SELECT row_to_json (t) FROM (
         SELECT
             asset_id,
             asset_type,
@@ -75,7 +75,7 @@ CREATE OR REPLACE FUNCTION empires.update_province_asset (
         FROM
             empires.province_assets pa
         WHERE
-            pa.asset_id = i_asset_id);
+            pa.asset_id = i_asset_id)t);
     END;
     $BODY$
     LANGUAGE plpgsql;

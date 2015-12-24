@@ -5,10 +5,10 @@ CREATE TABLE empires.organizations (
     owner       VARCHAR(10) NOT NULL,
     abbr        VARCHAR(3),
     treasury    SMALLINT DEFAULT 0,
-    CONSTRAINT abbr_length CHECK (char_length(abbr) < 2),
+    CONSTRAINT abbr_length CHECK (char_length(abbr) BETWEEN 2 AND 3),
     CONSTRAINT abbr_upper  CHECK (abbr = upper(abbr)),
     CONSTRAINT positive_treasuty CHECK (treasury > -1),
-    FOREIGN KEY (owner) REFERENCES empires.persons (pname) ON UPDATE CASCADE ON DELETE SET NULL
+    FOREIGN KEY (owner) REFERENCES empires.persons (pname) ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
 CREATE OR REPLACE FUNCTION empires.create_organization (
@@ -32,7 +32,7 @@ CREATE OR REPLACE FUNCTION empires.create_organization (
         i_owner,
         i_abbr,
         i_treasury);
-        RETURN (
+        RETURN ( SELECT row_to_json (t) FROM (
             SELECT
             oname,
             display,
@@ -42,7 +42,7 @@ CREATE OR REPLACE FUNCTION empires.create_organization (
             FROM
                 empires.organizations
             WHERE
-                oname = i_oname);
+                oname = i_oname) t );
     END;
     $BODY$
     LANGUAGE plpgsql;
@@ -64,7 +64,7 @@ CREATE OR REPLACE FUNCTION empires.update_organization (
             treasuty    = COALESCE(i_treasury, o.treasury)
         WHERE
             o.oname = i_oname;
-        RETURN (
+        RETURN ( SELECT row_to_json (t) FROM (
             SELECT
             display,
             owner,
@@ -73,7 +73,7 @@ CREATE OR REPLACE FUNCTION empires.update_organization (
             FROM
             empires.organizations
             WHERE
-            oname = i_oname);
+            oname = i_oname) t);
         END;
         $BODY$
         LANGUAGE plpgsql;

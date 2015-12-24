@@ -10,11 +10,11 @@ CREATE TABLE empires.provinces (
   visible boolean NOT NULL,
   abbr    VARCHAR(3),
   CONSTRAINT abbr_upper CHECK (abbr = upper(abbr)),
-  CONSTRAINT abbr_length CHECK ( char_length(abbr) < 2),
-  CONSTRAINT loyalty_boundary CHECK ( loyalty BETWEEN 0 AND 5),
+  CONSTRAINT abbr_length CHECK ( char_length(abbr) BETWEEN 2 AND 3),
+  CONSTRAINT loyalty_boundary CHECK ( loyalty BETWEEN 1 AND 5),
   CONSTRAINT level_boundary CHECK ( level BETWEEN 0 AND 10),
-  FOREIGN KEY (regent) REFERENCES empires.persons (pname) ON UPDATE CASCADE ON DELETE SET NULL,
-  FOREIGN KEY (domain) REFERENCES empires.domains (dname) ON UPDATE CASCADE ON DELETE SET NULL
+  FOREIGN KEY (regent) REFERENCES empires.persons (pname) ON UPDATE CASCADE ON DELETE RESTRICT,
+  FOREIGN KEY (domain) REFERENCES empires.domains (dname) ON UPDATE CASCADE ON DELETE RESTRICT
   );
 
 CREATE OR REPLACE FUNCTION empires.create_province (
@@ -48,7 +48,7 @@ CREATE OR REPLACE FUNCTION empires.create_province (
     i_domain,
     i_visible,
     i_abbr);
-    RETURN (
+    RETURN ( SELECT row_to_json (t) FROM (
     SELECT
       pname,
       display,
@@ -61,7 +61,7 @@ CREATE OR REPLACE FUNCTION empires.create_province (
     FROM
       empires.provinces
     WHERE
-      pname = i_pname);
+      pname = i_pname) t);
   END;
   $BODY$
   LANGUAGE plpgsql;
@@ -91,7 +91,7 @@ CREATE OR REPLACE FUNCTION empires.update_province (
       abbr    = COALESCE(i_abbr, provinces.abbr)
     WHERE
       pname = i_pname;
-  RETURN (
+  RETURN ( SELECT row_to_json (t) FROM (
     SELECT
       pname,
       display,
@@ -104,7 +104,7 @@ CREATE OR REPLACE FUNCTION empires.update_province (
     FROM
       empires.provinces
     WHERE
-      pname = i_pname);
+      pname = i_pname) t);
   END;
   $BODY$
   LANGUAGE plpgsql;

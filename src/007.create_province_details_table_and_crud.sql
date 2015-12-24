@@ -42,7 +42,7 @@ CREATE OR REPLACE FUNCTION empires.create_province_details(
         i_roads,
         i_city,
         i_bridges);
-        RETURN (
+        RETURN ( SELECT row_to_json (t) FROM (
             SELECT
             province_details_id
             province,
@@ -54,7 +54,7 @@ CREATE OR REPLACE FUNCTION empires.create_province_details(
             FROM
                 empires.province_details
             WHERE
-                province = i_province);
+                province = i_province) t);
     END;
     $BODY$
     LANGUAGE plpgsql;
@@ -80,7 +80,7 @@ CREATE OR REPLACE FUNCTION empires.update_province_details (
         bridges = COALESCE(i_bridges, pd.bridges)
     WHERE
         pd.province_details_id = i_province_details_id;
-    RETURN (
+    RETURN ( SELECT row_to_json (t) FROM (
         SELECT
             province_details_id
             province,
@@ -92,7 +92,7 @@ CREATE OR REPLACE FUNCTION empires.update_province_details (
         FROM
             empires.province_details pd
         WHERE
-            pd.province_details_id = i_province_details_id);
+            pd.province_details_id = i_province_details_id)t);
     END;
     $BODY$
     LANGUAGE plpgsql;

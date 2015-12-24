@@ -9,7 +9,7 @@ CREATE TABLE empires.holdings (
     owner       VARCHAR(10),
     province    VARCHAR(10),
     type        empires.holding_types,
-    FOREIGN KEY (owner) REFERENCES empires.organizations (oname) ON DELETE SET NULL ON UPDATE CASCADE,
+    FOREIGN KEY (owner) REFERENCES empires.organizations (oname) ON DELETE RESTRICT ON UPDATE CASCADE,
     FOREIGN KEY (province) REFERENCES empires.provinces (pname) ON DELETE CASCADE ON UPDATE CASCADE,
     PRIMARY KEY (owner, province)
 );
@@ -32,7 +32,7 @@ CREATE OR REPLACE FUNCTION empires.create_holding(
         i_owner,
         i_province,
         i_type);
-        RETURN (
+        RETURN ( SELECT row_to_json (t) FROM (
             SELECT
             holding_id,
             level,
@@ -44,7 +44,7 @@ CREATE OR REPLACE FUNCTION empires.create_holding(
             WHERE
                 owner   = i_owner
                 AND type = i_type
-                AND province = i_province);
+                AND province = i_province) t);
     END;
     $BODY$
     LANGUAGE plpgsql;
@@ -64,7 +64,7 @@ CREATE OR REPLACE FUNCTION empires.update_holding(
         owner   = COALESCE(i_owner, h.owner)
     WHERE
         h.holding_id = i_holding_id;
-    RETURN (
+    RETURN (SELECT row_to_json(t) FROM (
         SELECT
             holding_id,
             level,
@@ -74,7 +74,7 @@ CREATE OR REPLACE FUNCTION empires.update_holding(
         FROM
             empires.holdings h
         WHERE
-            h.holding_id = i_holding_id);
+            h.holding_id = i_holding_id) t);
     END;
     $BODY$
     LANGUAGE plpgsql;
