@@ -82,7 +82,7 @@ $BODY$
     SELECT ep.pname, ep.display, ep.level, ep.regent, ep.loyalty, ep.domain, ep.abbr, (
         SELECT array_to_json(array_agg(row_to_json(d)))
         FROM (
-            SELECT eh.holding_id, eh.level, eh.owner, eo.display, eh.type
+            SELECT eh.holding_id, eh.level, eh.owner, eo.display, eo.abbr, eh.type
             FROM empires.holdings eh, empires.organizations eo
             WHERE eh.province = ep.pname AND eh.owner = eo.oname) d) AS holdings
     FROM empires.provinces ep
